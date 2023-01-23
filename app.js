@@ -7,6 +7,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
+var noteModel = require('./models/note.model')
+app.use(noteModel)
 var app = express();
 
 // view engine setup
@@ -21,6 +23,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+
+
+const db = require("./models/note.model");
+db.sequelize.sync()
+    .then(() => {
+      console.log("Synced db.");
+    })
+    .catch((err) => {
+      console.log("Failed to sync db: " + err.message);
+    });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
