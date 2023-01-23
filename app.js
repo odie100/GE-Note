@@ -22,15 +22,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-
+// -------------- Run Database connection -----------------------
 const db = require("./models");
-db.sequelize.sync()
+db.sequelize.sync() // add {force:true} as function parameter to force migration
     .then(() => {
         console.log("Synced db.");
     })
     .catch((err) => {
         console.log("Failed to sync db: " + err.message);
     });
+// -------------------------------------------------------------
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

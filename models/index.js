@@ -19,6 +19,12 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+db.user = require("./user.model.js")(sequelize, Sequelize);
 db.note = require("./note.model.js")(sequelize, Sequelize);
+
+// ---------- table relation ------------
+db.user.hasMany(db.note)
+db.note.belongsTo(db.user)
+// --------------------------------------
 
 module.exports = db;

@@ -1,6 +1,5 @@
 const { DataTypes} = require("sequelize");
 
-
 module.exports = (sequelize) => {
     const Note = sequelize.define("note", {
         id: {
@@ -51,20 +50,6 @@ module.exports = (sequelize) => {
             type: DataTypes.TEXT
         },
 
-        // user_id: {
-        //   type: DataTypes.INTEGER,
-        //
-        //   references: {
-        //     // This is a reference to another model
-        //     model: Bar,
-        //
-        //     // This is the column name of the referenced model
-        //     key: 'id',
-        //
-        //     // With PostgreSQL, it is optionally possible to declare when to check the foreign key constraint, passing the Deferrable type.
-        //     deferrable: Deferrable.INITIALLY_IMMEDIATE
-        //   }
-        // }
     });
 
     return Note
