@@ -1,74 +1,71 @@
-const {Sequelize, DataTypes} = require("sequelize");
-const sequelize = new Sequelize('./../configuration/database');
+const { DataTypes} = require("sequelize");
 
-const Note = sequelize.define("note", {
-    id: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true
-    },
-    mention: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    parcours: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    level: { // L1, ..., M2,...
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    subject: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    session: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    numbers: {  // numbers of papers
-        type: DataTypes.INTEGER,
-        allowNull: false,
-    },
-    sending: { // way to send notes ex:colis ...
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    univ_year: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
 
-    operation_date: {
-        type: DataTypes.DATE,
-        defaultValue: new Date(),
-    },
+module.exports = (sequelize) => {
+    const Note = sequelize.define("note", {
+        id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            autoIncrement: true,
+            primaryKey: true
+        },
+        mention: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        parcours: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        level: { // L1, ..., M2,...
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        subject: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        session: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        numbers: {  // numbers of papers
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        sending: { // way to send notes ex:colis ...
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        univ_year: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
 
-    comment: {
-        type: DataTypes.TEXT
-    },
+        operation_date: {
+            type: DataTypes.DATE,
+            defaultValue: new Date(),
+        },
 
-    // user_id: {
-    //   type: DataTypes.INTEGER,
-    //
-    //   references: {
-    //     // This is a reference to another model
-    //     model: Bar,
-    //
-    //     // This is the column name of the referenced model
-    //     key: 'id',
-    //
-    //     // With PostgreSQL, it is optionally possible to declare when to check the foreign key constraint, passing the Deferrable type.
-    //     deferrable: Deferrable.INITIALLY_IMMEDIATE
-    //   }
-    // }
-});
+        comment: {
+            type: DataTypes.TEXT
+        },
 
-(async () => {
-    await sequelize.sync({force: true});
-    // Code here
-})();
+        // user_id: {
+        //   type: DataTypes.INTEGER,
+        //
+        //   references: {
+        //     // This is a reference to another model
+        //     model: Bar,
+        //
+        //     // This is the column name of the referenced model
+        //     key: 'id',
+        //
+        //     // With PostgreSQL, it is optionally possible to declare when to check the foreign key constraint, passing the Deferrable type.
+        //     deferrable: Deferrable.INITIALLY_IMMEDIATE
+        //   }
+        // }
+    });
 
-module.exports = Note;
+    return Note
+}
