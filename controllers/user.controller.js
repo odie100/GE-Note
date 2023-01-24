@@ -1,8 +1,12 @@
 const db = require('../models');
+const bcrypt = require("bcrypt");
+const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
 
-exports.create = (req, res) => {
+var hashed_password = "";
+
+exports.create = async (req, res) => {
 
     if(!req.body.password){
         res.status(400).send({
@@ -10,6 +14,13 @@ exports.create = (req, res) => {
         });
         return;
     }
+
+    await bcrypt.hash(req.body.password, salt_round).then(hash => {
+        hashed_password = hash;
+    }).catch(err => console.log("Can't hash password !"));
+
+
+    console.log("hashed: "+hashed_password);
 
     const user = {
         matricule : req.body.matricule,
@@ -19,12 +30,11 @@ exports.create = (req, res) => {
         phone : req.body.phone,
         status : false,
         role : req.body.role,
-        password : req.body.password,
+        password : hashed_password,
         avatar : req.body.avatar
     }
 
     User.create(user).then(data => {
-        console.log("Checked 1")
         res.status(200).send(data);
     }).catch(error => {
         res.status(500).send({
