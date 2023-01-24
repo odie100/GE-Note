@@ -74,3 +74,25 @@ exports.delete = (req,res) => {
         })
     })
 }
+
+
+exports.update = (req, res) => {
+    const id = req.params.id;
+
+    User.update(req.body, {
+        where: {id:id}
+    }).then(status => {
+        if(status == 1){
+            res.send({
+                message: "User updated successfully"})
+        }else{
+            res.send({
+                message: "Cannot update User with id: "+id
+            })
+        }
+    }).catch(err => {
+        res.status(500).send({
+            message: "Cannot perform action, internal server error"
+        })
+    });
+}

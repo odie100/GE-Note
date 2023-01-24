@@ -9,5 +9,7 @@ module.exports = app => {
 
   router.delete("/:id", users.delete);
 
+  router.put("/:id", users.update);
+
   app.use("/users",router);
 }
