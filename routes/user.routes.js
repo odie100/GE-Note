@@ -7,5 +7,7 @@ module.exports = app => {
 
   router.get("/:id", users.findOne);
 
+  router.delete("/:id", users.delete);
+
   app.use("/users",router);
 }

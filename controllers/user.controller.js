@@ -51,3 +51,26 @@ exports.findOne = (req, res) => {
         })
     })
 }
+
+
+exports.delete = (req,res) => {
+    const id = req.params.id;
+
+    User.destroy({
+        where: {id:id}
+    }).then( status => {
+        if(status == 1){
+            res.send({
+                message: "User deleted successfully"
+            })
+        }else{
+            res.send({
+                message:"Cannot delete User with id: "+id
+            })
+        }
+    }).catch(err => {
+        res.status(500).send({
+            message:"Could not delete User with id: "+id
+        })
+    })
+}
