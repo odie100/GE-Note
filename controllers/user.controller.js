@@ -96,3 +96,29 @@ exports.update = (req, res) => {
         })
     });
 }
+
+
+exports.signin = (req, res) => {
+    const email = req.body.email;
+    const password = req.body.password;
+
+    User.findOne({where: {email:email}}).then(data => {
+        if(data){
+            if(data.password == password){
+                res.status(200).send(data);
+            }else{
+                res.status(401).send({
+                    message: "Wrong password"
+                })
+            }
+        }else{
+            res.status(404).send({
+                message: "User not found"
+            })
+        }
+    }).catch(error => {
+        res.status(500).send({
+            message: "Internal server error"
+        })
+    })
+}
