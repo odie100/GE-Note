@@ -1,50 +1,56 @@
 const { DataTypes} = require("sequelize");
 
-
 module.exports = (sequelize) => {
-    const User = sequelize.define("user", {
+    const Note = sequelize.define("note", {
         id: {
             type: DataTypes.INTEGER,
             allowNull: false,
             autoIncrement: true,
             primaryKey: true
         },
-        matricule: {
+        mention: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        firstname: {
+        parcours: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        lastname: {
-            type: DataTypes.STRING,
-        },
-        email: {
+        level: { // L1, ..., M2,...
             type: DataTypes.STRING,
             allowNull: false,
         },
-        phone: {
+        subject: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        status: {  // active or not
-            type: DataTypes.BOOLEAN,
-            defaultValue: false,
-        },
-        role: {
+        session: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        password: {
+        numbers: {  // numbers of papers
+            type: DataTypes.INTEGER,
+            allowNull: false,
+        },
+        sending: { // way to send notes ex:colis ...
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        univ_year: {
             type: DataTypes.STRING,
             allowNull: false,
         },
 
-        avatar: {
-            type: DataTypes.STRING,
+        operation_date: {
+            type: DataTypes.DATE,
+            defaultValue: new Date(),
         },
+
+        comment: {
+            type: DataTypes.TEXT
+        },
+
     });
 
-    return User
+    return Note
 }
