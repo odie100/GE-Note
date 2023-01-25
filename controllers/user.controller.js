@@ -94,7 +94,7 @@ exports.update = (req, res) => {
     }).then(status => {
         if(status == 1){
             res.send({
-                message: "User updated successfully"})
+                message: "User updated successfully "})
         }else{
             res.send({
                 message: "Cannot update User with id: "+id
@@ -108,13 +108,14 @@ exports.update = (req, res) => {
 }
 
 
-exports.signin = (req, res) => {
+exports.signin = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
     User.findOne({where: {email:email}}).then(data => {
         if(data){
-            if(data.password == password){
+            if(compare(password, data.password)){
+                console.log(compare(password, data.password))
                 res.status(200).send(data);
             }else{
                 res.status(401).send({
@@ -131,4 +132,10 @@ exports.signin = (req, res) => {
             message: "Internal server error"
         })
     })
+}
+
+async function compare( password, hash){
+     bcrypt.compare(password, hash).then(result => {
+        return result;
+     }).catch(err => console.log(err));
 }
