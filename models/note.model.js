@@ -9,23 +9,25 @@ module.exports = (sequelize) => {
             primaryKey: true
         },
         mention: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(50),
             allowNull: false,
         },
         parcours: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(15),
             allowNull: false,
         },
         level: { // L1, ..., M2,...
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(5),
             allowNull: false,
         },
         subject: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(100),
             allowNull: false,
         },
         session: {
-            type: DataTypes.STRING,
+            type: DataTypes.ENUM({
+                values: ['Normale', 'Rattrapage']
+            }),
             allowNull: false,
         },
         numbers: {  // numbers of papers
@@ -37,15 +39,13 @@ module.exports = (sequelize) => {
             allowNull: false,
         },
         univ_year: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(15),
             allowNull: false,
         },
-
         operation_date: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             defaultValue: new Date(),
         },
-
         comment: {
             type: DataTypes.TEXT
         },
