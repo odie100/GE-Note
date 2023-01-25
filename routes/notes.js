@@ -1,7 +1,7 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
-var note = require('../controllers/note.controller')
+const note = require('../controllers/note.controller')
 
 router.get('/(:id)?', note.findNote );
 router.post('/create', note.create );
