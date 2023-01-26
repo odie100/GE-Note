@@ -26,7 +26,7 @@ module.exports = (sequelize) => {
         },
         session: {
             type: DataTypes.ENUM({
-                values: ['Normale', 'Rattrapage']
+                values: ['Normale', 'Rattrappage']
             }),
             allowNull: false,
         },
@@ -45,6 +45,10 @@ module.exports = (sequelize) => {
         operation_date: {
             type: DataTypes.DATEONLY,
             defaultValue: new Date(),
+        },
+        valid: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
         },
         comment: {
             type: DataTypes.TEXT
