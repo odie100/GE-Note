@@ -1,5 +1,6 @@
 const db = require('../models');
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
@@ -7,6 +8,8 @@ const op = db.Sequelize.Op;
 var hashed_password = "";
 
 exports.create = async (req, res) => {
+
+    let created_user;
 
     if(!req.body.password){
         res.status(400).send({
@@ -17,10 +20,9 @@ exports.create = async (req, res) => {
 
     await bcrypt.hash(req.body.password, salt_round).then(hash => {
         hashed_password = hash;
-    }).catch(err => console.log("Can't hash password !"));
-
-
-    console.log("hashed: "+hashed_password);
+    }).catch(err => {
+        console.log("Can't hash password !")
+    });
 
     const user = {
         matricule : req.body.matricule,
@@ -34,14 +36,27 @@ exports.create = async (req, res) => {
         avatar : req.body.avatar
     }
 
-    User.create(user).then(data => {
-        res.status(200).send(data);
+    created_user = await User.create(user).then(data => {
+        return data;
     }).catch(error => {
         res.status(500).send({
             message : error.message || "Internal server operation error"
         })
     })
 
+    let token;
+    try{
+        token = jwt.sign(
+            {user_id: created_user.id, role: created_user.role},
+            "emitech_secret_token_twenty",
+            {expiresIn: '1h'}
+        );
+    }catch(err){
+        res.status(500).send({
+            message: "Cant generate Token for the user !"
+        })
+    }
+    res.status(201).json({user_id:created_user.id, token:token})
 }
 
 exports.findOne = (req, res) => {
@@ -109,29 +124,55 @@ exports.update = (req, res) => {
 
 
 exports.signin = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const {email, password} = req.body
 
-    User.findOne({where: {email:email}}).then(data => {
+    let valid_password = false;
+
+    let existing_user = User.findOne({where: {email:email}}).then(data => {
         if(data){
-            if(compare(password, data.password)){
-                console.log(compare(password, data.password))
-                res.status(200).send(data);
-            }else{
-                res.status(401).send({
-                    message: "Wrong password"
-                })
-            }
-        }else{
-            res.status(404).send({
-                message: "User not found"
-            })
+            return data;
         }
     }).catch(error => {
         res.status(500).send({
             message: "Internal server error"
         })
     })
+
+    if(!existing_user){
+        res.status(400).send({
+            message:"User not found !"
+        })
+    }
+
+    try{
+        valid_password = await bcrypt.compare(password, hashed_password);
+    }catch(err){
+        console.log(err);
+    }
+
+    if(!valid_password){
+        res.status(400).send({
+            message:"Password Invalid !"
+        })
+    }
+
+    let token;
+    try{
+        token = jwt.sign({
+            user_id: existing_user.id,
+            role: existing_user.role
+        },
+        "emitech_secret_token_twenty",
+        {
+            expiresIn: '1h'
+        });
+        res.status(200).json({user_id:existing_user.id, token:token})
+    }catch(err){
+        res.status(500).send({
+            message: "Can't Generate token for user"
+        })
+    }
+    
 }
 
 async function compare( password, hash){
