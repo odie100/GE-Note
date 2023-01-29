@@ -24,7 +24,8 @@ db.note = require("./note.model.js")(sequelize, Sequelize);
 
 // ---------- table relation ------------
 db.user.hasMany(db.note)
-db.note.belongsTo(db.user)
+db.note.belongsTo(db.user, { as: 'Sender' });
+db.note.belongsTo(db.user, { as: 'Receiver' });
 // --------------------------------------
 
 module.exports = db;
