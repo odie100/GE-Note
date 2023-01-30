@@ -20,9 +20,10 @@ exports.create = async (req, res) => {
 
     await bcrypt.hash(req.body.password, salt_round).then(hash => {
         hashed_password = hash;
-    }).catch(err => {
-        console.log("Can't hash password !")
-    });
+    }).catch(err => console.log("Can't hash password !"));
+
+
+    console.log("hashed: "+hashed_password);
 
     const user = {
         matricule : req.body.matricule,
@@ -100,7 +101,6 @@ exports.delete = (req,res) => {
     })
 }
 
-
 exports.update = (req, res) => {
     const id = req.params.id;
 
@@ -124,9 +124,8 @@ exports.update = (req, res) => {
 
 
 exports.signin = async (req, res) => {
-    const {email, password} = req.body
-
-    let valid_password = false;
+    const email = req.body.email;
+    const password = req.body.password;
 
     let existing_user = User.findOne({where: {email:email}}).then(data => {
         if(data){
