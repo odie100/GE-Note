@@ -4,6 +4,9 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+var notesRouter = require('./routes/note.routes');
+var usersRouter = require('./routes/user.routes');
+
 var app = express();
 
 // view engine setup
@@ -16,7 +19,8 @@ app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-require("./routes/user.routes")(app)
+app.use('/notes', notesRouter);
+app.use('/users', usersRouter);
 
 // -------------- Run Database connection -----------------------
 const db = require("./models");
