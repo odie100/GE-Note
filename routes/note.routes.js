@@ -8,6 +8,6 @@ router.post('/send', note.create );
 router.put('/receive/:id', note.update ); // update with receiver id
 router.put('/update/:id', note.update ); // simple update
 router.delete('/delete/:id', note.destroy );
-router.post('/filters', note.filters );
+router.post('/filter', note.filter );
 
 module.exports = router;
