@@ -112,16 +112,19 @@ exports.signin = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    User.findOne({where: {email:email}}).then(data => {
+    let existed_user;
+
+    existed_user = await User.findOne({where: {email:email}}).then(data => {
         if(data){
-            if(compare(password, data.password)){
-                console.log(compare(password, data.password))
-                res.status(200).send(data);
-            }else{
-                res.status(401).send({
-                    message: "Wrong password"
-                })
-            }
+            // if(compare(password, data.password)){
+            //     console.log(compare(password, data.password))
+            //     res.status(200).send(data);
+            // }else{
+            //     res.status(401).send({
+            //         message: "Wrong password"
+            //     })
+            // }
+            return data;
         }else{
             res.status(404).send({
                 message: "User not found"
@@ -132,10 +135,24 @@ exports.signin = async (req, res) => {
             message: "Internal server error"
         })
     })
+
+    console.log("Existed_user: ", existed_user)
+    if(existed_user){
+        let status = await compare(password, existed_user.password);
+        console.log("Status: ", status);
+        if(status){
+            res.status(200).send(existed_user);
+        }else{
+            res.status(401).send({
+                message: "Wrong credentials !"
+            })
+        }
+    }
 }
 
 async function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
+        console.log("Comparison: "+result);
         return result;
      }).catch(err => console.log(err));
 }
