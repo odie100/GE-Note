@@ -176,6 +176,7 @@ exports.signin = async (req, res) => {
 
 async function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
+        console.log("Password comparison: ", result);
         return result;
      }).catch(err => console.log(err));
 }
