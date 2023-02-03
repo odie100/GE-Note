@@ -1,5 +1,6 @@
 const db = require('../models');
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
@@ -7,6 +8,8 @@ const op = db.Sequelize.Op;
 var hashed_password = "";
 
 exports.create = async (req, res) => {
+
+    let created_user;
 
     if(!req.body.password){
         res.status(400).send({
@@ -20,8 +23,6 @@ exports.create = async (req, res) => {
     }).catch(err => console.log("Can't hash password !"));
 
 
-    console.log("hashed: "+hashed_password);
-
     const user = {
         matricule : req.body.matricule,
         firstname : req.body.firstname,
@@ -34,14 +35,32 @@ exports.create = async (req, res) => {
         avatar : req.body.avatar
     }
 
-    User.create(user).then(data => {
-        res.status(200).send(data);
+    created_user = await User.create(user).then(data => {
+        return data;
     }).catch(error => {
         res.status(500).send({
             message : error.message || "Internal server operation error"
         })
     })
 
+    let token;
+
+    try{
+        token = jwt.sign(
+            {user_id: created_user.id, role: created_user.role},
+            "emitech_secret_token_twenty",
+            {expiresIn: '1h'}
+        );
+    }catch(err){
+        console.log(err)
+        res.status(500).send({
+            message: "Cant generate Token for the user !"
+        })
+    }
+
+    if(token){
+        res.status(201).json({user_id:created_user.id, token:token})
+    }
 }
 
 exports.findOne = (req, res) => {
@@ -114,6 +133,7 @@ exports.signin = async (req, res) => {
     User.findOne({where: {email:email}}).then(data => {
         if(data){
             let status = compare(password, data.password);
+            console.log(status)
             if(status){
                 res.status(200).send(data);
             }else{
@@ -136,6 +156,7 @@ exports.signin = async (req, res) => {
 
 function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
+        console.log(result)
         return result;
      }).catch(err => console.log(err));
 }
