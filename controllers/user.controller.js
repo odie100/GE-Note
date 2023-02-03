@@ -109,22 +109,18 @@ exports.update = (req, res) => {
 
 
 exports.signin = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const {email, password} = req.body
 
-    let existed_user;
-
-    existed_user = await User.findOne({where: {email:email}}).then(data => {
+    User.findOne({where: {email:email}}).then(data => {
         if(data){
-            // if(compare(password, data.password)){
-            //     console.log(compare(password, data.password))
-            //     res.status(200).send(data);
-            // }else{
-            //     res.status(401).send({
-            //         message: "Wrong password"
-            //     })
-            // }
-            return data;
+            if(compare(password, data.password)){
+                console.log(compare(password, data.password))
+                res.status(200).send(data);
+            }else{
+                res.status(401).send({
+                    message: "Wrong password"
+                })
+            }
         }else{
             res.status(404).send({
                 message: "User not found"
@@ -159,9 +155,8 @@ exports.signin = async (req, res) => {
     }
 }
 
-async function compare( password, hash){
+function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
-        console.log("Comparison: "+result);
         return result;
      }).catch(err => console.log(err));
 }
