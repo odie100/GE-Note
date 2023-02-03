@@ -1,6 +1,5 @@
 const db = require('../models');
 const bcrypt = require("bcrypt");
-const jwt = require('jsonwebtoken');
 const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
@@ -8,8 +7,6 @@ const op = db.Sequelize.Op;
 var hashed_password = "";
 
 exports.create = async (req, res) => {
-
-    let created_user;
 
     if(!req.body.password){
         res.status(400).send({
@@ -37,27 +34,14 @@ exports.create = async (req, res) => {
         avatar : req.body.avatar
     }
 
-    created_user = await User.create(user).then(data => {
-        return data;
+    User.create(user).then(data => {
+        res.status(200).send(data);
     }).catch(error => {
         res.status(500).send({
             message : error.message || "Internal server operation error"
         })
     })
 
-    let token;
-    try{
-        token = jwt.sign(
-            {user_id: created_user.id, role: created_user.role},
-            "emitech_secret_token_twenty",
-            {expiresIn: '1h'}
-        );
-    }catch(err){
-        res.status(500).send({
-            message: "Cant generate Token for the user !"
-        })
-    }
-    res.status(201).json({user_id:created_user.id, token:token})
 }
 
 exports.findOne = (req, res) => {
@@ -101,6 +85,7 @@ exports.delete = (req,res) => {
     })
 }
 
+
 exports.update = (req, res) => {
     const id = req.params.id;
 
@@ -127,9 +112,23 @@ exports.signin = async (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
 
-    let existing_user = User.findOne({where: {email:email}}).then(data => {
+    let existed_user;
+
+    existed_user = await User.findOne({where: {email:email}}).then(data => {
         if(data){
+            // if(compare(password, data.password)){
+            //     console.log(compare(password, data.password))
+            //     res.status(200).send(data);
+            // }else{
+            //     res.status(401).send({
+            //         message: "Wrong password"
+            //     })
+            // }
             return data;
+        }else{
+            res.status(404).send({
+                message: "User not found"
+            })
         }
     }).catch(error => {
         res.status(500).send({
@@ -137,46 +136,32 @@ exports.signin = async (req, res) => {
         })
     })
 
-    if(!existing_user){
-        res.status(400).send({
-            message:"User not found !"
-        })
+    console.log("Existed_user: ", existed_user)
+    if(existed_user){
+        let status = await compare(password, existed_user.password);
+        // let status = await ( password, hash) => {
+        //     bcrypt.compare(password, hash).then(result => {
+        //        console.log("Comparison: "+result);
+        //        return result;
+        //     }).catch(err => {
+        //         console.log("Comparison error")
+        //         console.log(err)   
+        //     });
+    //    }
+        console.log("Status: ", status);
+        if(status){
+            res.status(200).send(existed_user);
+        }else{
+            res.status(401).send({
+                message: "Wrong credentials !"
+            })
+        }
     }
-
-    try{
-        valid_password = await bcrypt.compare(password, hashed_password);
-    }catch(err){
-        console.log(err);
-    }
-
-    if(!valid_password){
-        res.status(400).send({
-            message:"Password Invalid !"
-        })
-    }
-
-    let token;
-    try{
-        token = jwt.sign({
-            user_id: existing_user.id,
-            role: existing_user.role
-        },
-        "emitech_secret_token_twenty",
-        {
-            expiresIn: '1h'
-        });
-        res.status(200).json({user_id:existing_user.id, token:token})
-    }catch(err){
-        res.status(500).send({
-            message: "Can't Generate token for user"
-        })
-    }
-    
 }
 
 async function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
-        console.log("Password comparison: ", result);
+        console.log("Comparison: "+result);
         return result;
      }).catch(err => console.log(err));
 }
