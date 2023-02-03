@@ -129,15 +129,10 @@ exports.update = (req, res) => {
 
 exports.signin = async (req, res) => {
     const {email, password} = req.body
+    let token;
 
     var existed_user = await User.findOne({where: {email:email}}).then(data => {
-        if(data){
-            return data;
-        }else{
-            res.status(404).send({
-                message: "User not found"
-            })
-        }
+        return data;
     }).catch(error => {
         res.status(500).send({
             message: "Internal server error"
@@ -150,14 +145,32 @@ exports.signin = async (req, res) => {
         }).catch(err => {
             return false;
         })
-        console.log("status: "+status)
-        if(status === true){
-            res.status(200).send(existed_user);
+
+        if(status){
+            try{
+                token = jwt.sign(
+                    {role: existed_user.role},
+                    "emitech_secret_token_twenty",
+                    {expiresIn: '1h'}
+                );
+            }catch(err){
+                console.log(err)
+                res.status(500).send({
+                    message: "Cant generate Token for the user !"
+                })
+            }
+            if(token){
+                res.status(201).json({user_id:existed_user.id, access_token:token});
+            }
         }else{
             res.status(401).send({
                 message: "Wrong password"
             })
         }
+    }else{
+        res.status(404).send({
+            message: "User not found"
+        })
     }
 
 }
