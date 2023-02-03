@@ -113,8 +113,8 @@ exports.signin = async (req, res) => {
 
     User.findOne({where: {email:email}}).then(data => {
         if(data){
-            if(compare(password, data.password)){
-                console.log(compare(password, data.password))
+            let status = compare(password, data.password);
+            if(status){
                 res.status(200).send(data);
             }else{
                 res.status(401).send({
@@ -132,27 +132,6 @@ exports.signin = async (req, res) => {
         })
     })
 
-    console.log("Existed_user: ", existed_user)
-    if(existed_user){
-        let status = await compare(password, existed_user.password);
-        // let status = await ( password, hash) => {
-        //     bcrypt.compare(password, hash).then(result => {
-        //        console.log("Comparison: "+result);
-        //        return result;
-        //     }).catch(err => {
-        //         console.log("Comparison error")
-        //         console.log(err)   
-        //     });
-    //    }
-        console.log("Status: ", status);
-        if(status){
-            res.status(200).send(existed_user);
-        }else{
-            res.status(401).send({
-                message: "Wrong credentials !"
-            })
-        }
-    }
 }
 
 function compare( password, hash){
