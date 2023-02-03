@@ -104,13 +104,15 @@ exports.update = (req, res) => {
 }
 
 
-exports.signin = async (req, res) => {
+exports.signin = (req, res) => {
     const {email, password} = req.body
-
     User.findOne({where: {email:email}}).then(data => {
+        console.log(data)
         if(data){
-            if(compare(password, data.password)){
-                console.log(compare(password, data.password))
+            let status = compare(password, data.password);
+            res.status(200).send(status);
+            console.log(status);
+            if(status){
                 res.status(200).send(data);
             }else{
                 res.status(401).send({
@@ -129,8 +131,9 @@ exports.signin = async (req, res) => {
     })
 }
 
-async function compare( password, hash){
+function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
+        console.log(result)
         return result;
      }).catch(err => console.log(err));
 }
