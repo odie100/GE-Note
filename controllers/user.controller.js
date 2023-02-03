@@ -11,7 +11,7 @@ exports.create = async (req, res) => {
 
     let created_user;
 
-    if(!req.body.password){
+    if(!req.body.password || !req.body.email || !req.body.password || !req.body.firstname || !req.body.lastname || !req.body.role){
         res.status(400).send({
             message:"Information must not be empty"
         });
@@ -59,7 +59,7 @@ exports.create = async (req, res) => {
     }
 
     if(token){
-        res.status(201).json({user_id:created_user.id, token:token})
+        res.status(201).json({user_id:created_user.id, access_token:token})
     }
 }
 
