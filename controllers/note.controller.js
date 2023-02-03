@@ -131,76 +131,35 @@ const destroy = async (req, res) => {
         })
 }
 
-const filters = async (req, res) => {
-    let to_find = {}
+const filter = async(req, res)=>{
     const {
-        mention, parcours, level, subject, session, univ_year, valid, SenderId, ReceiverId,
-        send_date, receive_date, send_date_start, send_date_end, receive_date_start, receive_date_end
+         send_date_start, send_date_end, receive_date_start, receive_date_end
     } = req.body;
 
+    let note = []
 
-    console.log('REQ ', req.body)
-
-    if (subject) {
-        await check('subject').not().isEmpty().isLength({max: 100}).run(req)
-        to_find = {subject: subject}
-    } else if (level) {
-        await check('level').not().isEmpty().isLength({min: 2, max: 5}).run(req)
-        to_find = {level: level}
-    } else if (mention) {
-        await check('mention').not().isEmpty().isLength({min: 2, max: 50}).run(req)
-        to_find = {mention: mention}
-    } else if (parcours) {
-        await check('parcours').not().isEmpty().isLength({min: 2, max: 15}).run(req)
-        to_find = {parcours: parcours}
-    } else if (session) {
-        await check('session').not().isEmpty().isLength({min: 5}).run(req)
-        to_find = {session: session}
-    } else if (univ_year) {
-        await check('univ_year').not().isEmpty().isLength({min: 4, max: 15}).run(req)
-        to_find = {univ_year: univ_year}
-    } else if (SenderId) {
-        await check('SenderId').not().isEmpty().run(req)
-        to_find = {SenderId: SenderId}
-    } else if (ReceiverId) {
-        await check('ReceiverId').not().isEmpty().run(req)
-        to_find = {ReceiverId: ReceiverId}
-    } else if (send_date) {
-        await check('send_date').not().isEmpty().run(req)
-        to_find = {send_date: send_date}
-    } else if (receive_date) {
-        await check('receive_date').not().isEmpty().run(req)
-        to_find = {receive_date: receive_date}
-    } else if (send_date_start && send_date_end) {
-        await check('send_date_start').not().isEmpty().isDate().run(req)
-        await check('send_date_end').not().isEmpty().isDate().run(req)
-        to_find = {
-            send_date: {
-                [Op.between]: [send_date_start, send_date_end]
-            }
+    if(send_date_start){
+        req.body.send_date = {
+            [Op.between]: [send_date_start, send_date_end]
         }
-    } else if (receive_date_start && receive_date_end) {
-        await check('receive_date_start').not().isEmpty().isDate().run(req)
-        await check('receive_date_end').not().isEmpty().isDate().run(req)
-        to_find = {
-            receive_date: {
-                [Op.between]: [receive_date_start, receive_date_end]
-            }
+        delete req.body.send_date_start
+        delete req.body.send_date_end
+    }
+    if(receive_date_start){
+        req.body.receive_date = {
+            [Op.between]: [receive_date_start, receive_date_end]
         }
-    } else if (valid === true || valid === false) {
-        await check('valid').not().isEmpty().run(req)
-        to_find = {valid: valid}
-    } else {
-        return res.status(400).json({message: "Incomplete information"});
+        delete req.body.receive_date_start
+        delete req.body.receive_date_end
     }
 
-    const result = validationResult(req);
-    if (!result.isEmpty()) {
-        return res.status(400).json({message: result.array()});
+    try{
+        note = await Note.findAll( { where: req.body } );
+    }catch (e) {
+        //
     }
 
-
-    const note = await Note.findAll({where: to_find});
     res.status(200).send(note)
 }
-module.exports = {findNote, create, update, destroy, filters}
+
+module.exports = { findNote, create, update, destroy, filter }
