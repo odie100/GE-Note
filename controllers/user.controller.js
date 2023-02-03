@@ -132,9 +132,10 @@ exports.signin = async (req, res) => {
 
     User.findOne({where: {email:email}}).then(data => {
         if(data){
+            console.log("callin: "+compare(password, data.password));
             let status = compare(password, data.password);
             console.log(status)
-            if(status){
+            if(status === true){
                 res.status(200).send(data);
             }else{
                 res.status(401).send({
@@ -154,9 +155,10 @@ exports.signin = async (req, res) => {
 
 }
 
-function compare( password, hash){
-     bcrypt.compare(password, hash).then(result => {
-        console.log(result)
+async function compare( password, hash){
+   const result = await bcrypt.compare(password, hash).then(result => {
         return result;
      }).catch(err => console.log(err));
+    
+    return result;
 }
