@@ -1,5 +1,6 @@
 const db = require('../models');
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
 const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
@@ -8,7 +9,9 @@ var hashed_password = "";
 
 exports.create = async (req, res) => {
 
-    if(!req.body.password){
+    let created_user;
+
+    if(!req.body.password || !req.body.email || !req.body.password || !req.body.firstname || !req.body.lastname || !req.body.role){
         res.status(400).send({
             message:"Information must not be empty"
         });
@@ -19,8 +22,6 @@ exports.create = async (req, res) => {
         hashed_password = hash;
     }).catch(err => console.log("Can't hash password !"));
 
-
-    console.log("hashed: "+hashed_password);
 
     const user = {
         matricule : req.body.matricule,
@@ -34,14 +35,32 @@ exports.create = async (req, res) => {
         avatar : req.body.avatar
     }
 
-    User.create(user).then(data => {
-        res.status(200).send(data);
+    created_user = await User.create(user).then(data => {
+        return data;
     }).catch(error => {
         res.status(500).send({
             message : error.message || "Internal server operation error"
         })
     })
 
+    let token;
+
+    try{
+        token = jwt.sign(
+            {user_id: created_user.id, role: created_user.role},
+            "emitech_secret_token_twenty",
+            {expiresIn: '1h'}
+        );
+    }catch(err){
+        console.log(err)
+        res.status(500).send({
+            message: "Cant generate Token for the user !"
+        })
+    }
+
+    if(token){
+        res.status(201).json({user_id:created_user.id, access_token:token})
+    }
 }
 
 exports.findOne = (req, res) => {
@@ -109,9 +128,10 @@ exports.update = (req, res) => {
 
 
 exports.signin = async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
+    const {email, password} = req.body
+    let token;
 
+<<<<<<< HEAD
     let existed_user;
 
     existed_user = await User.findOne({where: {email:email}}).then(data => {
@@ -130,11 +150,16 @@ exports.signin = async (req, res) => {
                 message: "User not found"
             })
         }
+=======
+    var existed_user = await User.findOne({where: {email:email}}).then(data => {
+        return data;
+>>>>>>> user
     }).catch(error => {
         res.status(500).send({
             message: "Internal server error"
         })
     })
+<<<<<<< HEAD
 
     console.log("Existed_user: ", existed_user)
     if(existed_user){
@@ -153,6 +178,49 @@ exports.signin = async (req, res) => {
 async function compare( password, hash){
      bcrypt.compare(password, hash).then(result => {
         console.log("Comparison: "+result);
+=======
+    
+    if(existed_user){
+        let status = await compare(password, existed_user.password).then(res => {
+            return res;
+        }).catch(err => {
+            return false;
+        })
+
+        if(status){
+            try{
+                token = jwt.sign(
+                    {role: existed_user.role},
+                    "emitech_secret_token_twenty",
+                    {expiresIn: '1h'}
+                );
+            }catch(err){
+                console.log(err)
+                res.status(500).send({
+                    message: "Cant generate Token for the user !"
+                })
+            }
+            if(token){
+                res.status(201).json({user_id:existed_user.id, access_token:token});
+            }
+        }else{
+            res.status(401).send({
+                message: "Wrong password"
+            })
+        }
+    }else{
+        res.status(404).send({
+            message: "User not found"
+        })
+    }
+
+}
+
+async function compare( password, hash){
+   const res = await bcrypt.compare(password, hash).then(result => {
+>>>>>>> user
         return result;
      }).catch(err => console.log(err));
+    
+    return res;
 }
