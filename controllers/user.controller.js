@@ -131,7 +131,6 @@ exports.signin = async (req, res) => {
     const {email, password} = req.body
     let token;
 
-<<<<<<< HEAD
     let existed_user;
 
     existed_user = await User.findOne({where: {email:email}}).then(data => {
@@ -150,16 +149,11 @@ exports.signin = async (req, res) => {
                 message: "User not found"
             })
         }
-=======
-    var existed_user = await User.findOne({where: {email:email}}).then(data => {
-        return data;
->>>>>>> user
     }).catch(error => {
         res.status(500).send({
             message: "Internal server error"
         })
     })
-<<<<<<< HEAD
 
     console.log("Existed_user: ", existed_user)
     if(existed_user){
@@ -176,49 +170,8 @@ exports.signin = async (req, res) => {
 }
 
 async function compare( password, hash){
-     bcrypt.compare(password, hash).then(result => {
+    const res = bcrypt.compare(password, hash).then(result => {
         console.log("Comparison: "+result);
-=======
-    
-    if(existed_user){
-        let status = await compare(password, existed_user.password).then(res => {
-            return res;
-        }).catch(err => {
-            return false;
-        })
-
-        if(status){
-            try{
-                token = jwt.sign(
-                    {role: existed_user.role},
-                    "emitech_secret_token_twenty",
-                    {expiresIn: '1h'}
-                );
-            }catch(err){
-                console.log(err)
-                res.status(500).send({
-                    message: "Cant generate Token for the user !"
-                })
-            }
-            if(token){
-                res.status(201).json({user_id:existed_user.id, access_token:token});
-            }
-        }else{
-            res.status(401).send({
-                message: "Wrong password"
-            })
-        }
-    }else{
-        res.status(404).send({
-            message: "User not found"
-        })
-    }
-
-}
-
-async function compare( password, hash){
-   const res = await bcrypt.compare(password, hash).then(result => {
->>>>>>> user
         return result;
      }).catch(err => console.log(err));
     
