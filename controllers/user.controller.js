@@ -155,10 +155,8 @@ exports.signin = async (req, res) => {
         })
     })
 
-    console.log("Existed_user: ", existed_user)
     if(existed_user){
         let status = await compare(password, existed_user.password);
-        console.log("Status: ", status);
         if(status){
             res.status(200).send(existed_user);
         }else{
@@ -171,7 +169,6 @@ exports.signin = async (req, res) => {
 
 async function compare( password, hash){
     const res = bcrypt.compare(password, hash).then(result => {
-        console.log("Comparison: "+result);
         return result;
      }).catch(err => console.log(err));
     
