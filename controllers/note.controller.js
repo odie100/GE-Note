@@ -49,6 +49,17 @@ const findNote = async (req, res) => {
 }
 
 const create = async (req, res) => {
+
+    const token = req.params.token;
+    
+    if(token){
+        if(!checkAuth(token, "admin") && !checkAuth(token, "prof") ){
+            res.status(401).send({
+                message: "Unauthorized !"
+            })
+        }
+    }
+
     const {
         mention, parcours, level, subject, session, numbers, sending,
         univ_year, comment, SenderId
@@ -95,6 +106,17 @@ const create = async (req, res) => {
 };
 
 const update = async (req, res) => {
+
+    const token = req.params.token;
+    
+    if(token){
+        if(!checkAuth(token, "admin") && !checkAuth(token, "prof") ){
+            res.status(401).send({
+                message: "Unauthorized !"
+            })
+        }
+    }
+
     const id = req.params.id
     const data = req.body
 
@@ -135,6 +157,14 @@ const update = async (req, res) => {
 const destroy = async (req, res) => {
     const id = req.params.id;
     const token = req.params.token;
+
+    if(token){
+        if(!checkAuth(token, "admin")){
+            res.status(401).send({
+                message: "Unauthorized !"
+            })
+        }
+    }
 
     if(parseJwt(token).role !== 'admin'){
         res.status(403).send({
