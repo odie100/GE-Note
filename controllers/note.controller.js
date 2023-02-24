@@ -19,6 +19,25 @@ const USER_OPTION = {
 }
 
 const findNote = async (req, res) => {
+    // if token is in the header
+    // const token = req.headers.authorization.split(' ')[1];
+    const token = req.params.token;
+    var role;
+
+    if(token){  
+        role = parseJwt(token).role;
+    }else{
+        res.status(401).send({
+            message: "Unauthorized !"
+        });
+    }
+
+    if(!checkAuth(token, "admin") && !checkAuth(token, "prof") ){
+        res.status(401).send({
+            message: "Unauthorized !"
+        })
+    }
+
     const id = req.params.id
     let note = []
     if (id > 0) {
@@ -79,8 +98,6 @@ const update = async (req, res) => {
     const id = req.params.id
     const data = req.body
 
-    console.log("url ", req.originalUrl)
-
     await check('mention').not().isEmpty().isLength({min: 2, max: 50}).run(req)
     await check('parcours').not().isEmpty().isLength({min: 2, max: 15}).run(req)
     await check('level').not().isEmpty().isLength({min: 2, max: 5}).run(req)
@@ -116,7 +133,15 @@ const update = async (req, res) => {
 }
 
 const destroy = async (req, res) => {
-    const id = req.params.id
+    const id = req.params.id;
+    const token = req.params.token;
+
+    if(parseJwt(token).role !== 'admin'){
+        res.status(403).send({
+            message: "You are not allowed to delete this note"
+        })
+    }
+
     Note.destroy({
         where: {id}
     })
@@ -156,10 +181,26 @@ const filter = async(req, res)=>{
     try{
         note = await Note.findAll( { where: req.body } );
     }catch (e) {
-        //
+        res.status(500).send({
+            message: e.message || "Internal server operation error"
+        })
     }
 
     res.status(200).send(note)
+}
+
+function parseJwt (token) {
+    return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+}
+
+function checkAuth(token, role){
+    if(token){  
+        if(role === parseJwt(token).role){
+            return true;
+        } 
+    }else{
+        return false;
+    }
 }
 
 module.exports = { findNote, create, update, destroy, filter }
