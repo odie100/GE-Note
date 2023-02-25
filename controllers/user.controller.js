@@ -37,35 +37,31 @@ exports.create = async (req, res) => {
         avatar : req.body.avatar
     }
 
-    created_user = await User.create(user).then(data => {
+    await User.create(user).then(data => {
         return data;
     }).catch(error => {
         res.status(500).send({
             message : error.message || "Internal server operation error"
         })
     })
-
-    /*let token;
-
-    try{
-        token = jwt.sign(
-            {user_id: created_user.id, role: created_user.role},
-            "emitech_secret_token_twenty",
-            {expiresIn: '1h'}
-        );
-    }catch(err){
-        console.log(err)
-        res.status(500).send({
-            message: "Cant generate Token for the user !"
-        })
-    }
-
-    if(token){
-        res.status(201).json({user_id:created_user.id, access_token:token})
-    }*/
 }
 
 exports.findOne = (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    //Authorization: 'Bearer TOKEN'
+    if (!token) {
+        return res.status(200).json({success: false, message: "Error! Token was not provided."});
+    }
+    //Decoding the token
+    let decodedToken
+    try{
+        decodedToken = jwt.verify(token, dbConfig.TOKEN_KEY);
+    }catch (e) {}
+
+    if(decodedToken.role?.toLowerCase() !== "admin"){
+        return res.status(200).json({success: false, message: "User unauthorized to operate."});
+    }
+
     const id = req.params.id;
 
     User.findByPk(id).then(data => {
@@ -85,6 +81,21 @@ exports.findOne = (req, res) => {
 
 
 exports.delete = (req,res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    //Authorization: 'Bearer TOKEN'
+    if (!token) {
+        return res.status(200).json({success: false, message: "Error! Token was not provided."});
+    }
+    //Decoding the token
+    let decodedToken
+    try{
+        decodedToken = jwt.verify(token, dbConfig.TOKEN_KEY);
+    }catch (e) {}
+
+    if(decodedToken.role?.toLowerCase() !== "admin"){
+        return res.status(200).json({success: false, message: "User unauthorized to operate."});
+    }
+
     const id = req.params.id;
 
     User.destroy({
@@ -108,6 +119,21 @@ exports.delete = (req,res) => {
 
 
 exports.update = (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    //Authorization: 'Bearer TOKEN'
+    if (!token) {
+        return res.status(200).json({success: false, message: "Error! Token was not provided."});
+    }
+    //Decoding the token
+    let decodedToken
+    try{
+        decodedToken = jwt.verify(token, dbConfig.TOKEN_KEY);
+    }catch (e) {}
+
+    if(decodedToken.role?.toLowerCase() !== "admin"){
+        return res.status(200).json({success: false, message: "User unauthorized to operate."});
+    }
+
     const id = req.params.id;
 
     User.update(req.body, {
