@@ -1,6 +1,8 @@
 const db = require('../models');
 const bcrypt = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const dbConfig = require("../configuration/db.config.js");
+
 const salt_round = 10;
 const User = db.user;
 const op = db.Sequelize.Op;
@@ -43,7 +45,7 @@ exports.create = async (req, res) => {
         })
     })
 
-    let token;
+    /*let token;
 
     try{
         token = jwt.sign(
@@ -60,7 +62,7 @@ exports.create = async (req, res) => {
 
     if(token){
         res.status(201).json({user_id:created_user.id, access_token:token})
-    }
+    }*/
 }
 
 exports.findOne = (req, res) => {
@@ -129,20 +131,11 @@ exports.update = (req, res) => {
 
 exports.signin = async (req, res) => {
     const {email, password} = req.body
-    let token;
 
     let existed_user;
 
     existed_user = await User.findOne({where: {email:email}}).then(data => {
         if(data){
-            // if(compare(password, data.password)){
-            //     console.log(compare(password, data.password))
-            //     res.status(200).send(data);
-            // }else{
-            //     res.status(401).send({
-            //         message: "Wrong password"
-            //     })
-            // }
             return data;
         }else{
             res.status(404).send({
@@ -155,12 +148,26 @@ exports.signin = async (req, res) => {
         })
     })
 
-    console.log("Existed_user: ", existed_user)
     if(existed_user){
         let status = await compare(password, existed_user.password);
-        console.log("Status: ", status);
         if(status){
-            res.status(200).send(existed_user);
+            // create user token
+            let token;
+            try{
+                token = jwt.sign(
+                    {user_id: existed_user.id, role: existed_user.role},
+                    dbConfig.TOKEN_KEY
+                );
+            }catch(err){
+                console.log(err)
+                res.status(500).send({
+                    message: "Cant generate Token for the user !"
+                })
+            }
+
+            if(token){
+                res.status(201).json({access_token:token})
+            }
         }else{
             res.status(401).send({
                 message: "Wrong credentials !"

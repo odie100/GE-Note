@@ -1,7 +1,7 @@
 module.exports = {
     HOST: "localhost",
-    USER: "odie",
-    PASSWORD: "",
+    USER: "Emitech",
+    PASSWORD: "Emitech$",
     DB: "genote",
     dialect: "mysql",
     pool: {
@@ -9,5 +9,6 @@ module.exports = {
         min: 0,
         acquire: 30000,
         idle: 10000
-    }
+    },
+    TOKEN_KEY: "emitech_secret_token_twenty"
 };
